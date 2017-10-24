@@ -34,19 +34,11 @@ reader = bfGetReader('nfkb_movie1.tif');
 z = 1; c = 1; t = 1;
 
 ind = reader.getIndex(z-1,c-1,t-1)+1;
-frameT1_C1 = bfGetPlane(reader,ind);
-imwrite(frameT1_C1,'nfkb_Frame1_C1.tif','tif');
-ind = reader.getIndex(z-1,c,t-1)+1;
-frameT1_C2 = bfGetPlane(reader,ind);
-imwrite(frameT1_C2,'nfkb_Frame1_C2.tif','tif');
+frameT1 = bfGetPlane(reader,ind);
+imwrite(frameT1,'nfkb_Frame1.tif','tif');
 ind = reader.getIndex(z-1,c-1,t)+1;
-frameT2_C1 = bfGetPlane(reader,ind);
-imwrite(frameT2_C1,'nfkb_Frame2_C1.tif','tif');
-ind = reader.getIndex(z-1,c,t)+1;
-frameT2_C2 = bfGetPlane(reader,ind);
-imwrite(frameT2_C2,'nfkb_Frame2_C2.tif','tif');
-
-
+frameT2 = bfGetPlane(reader,ind);
+imwrite(frameT2,'nfkb_Frame2.tif','tif');
 %mask generation performed in ilastik
 
 
@@ -61,31 +53,26 @@ figure(x);hist([cellstats.Area],40);
 xlabel('Cell Area','FontSize',24);ylabel('Frequency','FontSize',24);
 
 %Cell size is most likely greater than 500 pixels. 
-minarea = 500;
+minarea = 500
 maskT1 = imfill(maskT1,'holes');
 maskT1 = bwareaopen(maskT1,minarea);
 maskT2 = imfill(maskT2,'holes');
 maskT2 = bwareaopen(maskT2,minarea);
 %x = x+1;figure(x);imshowpair(maskT1,maskT2);%used to check cell overlap
 
-stats1 = regionprops(maskT1, frameT1_C1, 'Centroid','area','Meanintensity');
-stats1_C2 = regionprops(maskT1, frameT1_C2, 'Meanintensity');
-stats2 = regionprops(maskT2, frameT2_C1, 'Centroid','area','Meanintensity');
+stats1 = regionprops(maskT1, imgT1, 'Centroid','area','Meanintensity');
+stats2 = regionprops(maskT2, imgT2, 'Centroid','area','Meanintensity');
 
 xy1 = cat(1,stats1.Centroid);
 a1 = cat(1,stats1.Area);
 avgInt1 = cat(1,stats1.MeanIntensity);
 tmp = -1*ones(size(a1));
-peaks{1} = [xy1, a1, tmp, avgInt1];
+
 
 xy2 = cat(1,stats2.Centroid);
 a2 = cat(1,stats2.Area);
 avgInt2 = cat(1,stats2.MeanIntensity);
-tmp = -1*ones(size(a2));
-peaks{2} = [xy2, a2, tmp, avgInt2];
-%x,y,area,-1,chan1 intensity, chan 2 intensity
-
-
+tmp = -1*ones(size(a1));
 % Part 2. Run match frames on this peaks array. ensure that it has filled
 % the entries in peaks as described above. 
 
