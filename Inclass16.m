@@ -57,8 +57,8 @@ maskT2 = masks(:,:,1);
 
 %Check the cell populaiton via histogram
 cellstats = regionprops(maskT1,'area');
-figure(x);hist([cellstats.Area],40);
-xlabel('Cell Area','FontSize',24);ylabel('Frequency','FontSize',24);
+%figure(1);hist([cellstats.Area],40);
+%xlabel('Cell Area','FontSize',24);ylabel('Frequency','FontSize',24);
 
 %Cell size is most likely greater than 500 pixels. 
 minarea = 500;
@@ -71,25 +71,60 @@ maskT2 = bwareaopen(maskT2,minarea);
 stats1 = regionprops(maskT1, frameT1_C1, 'Centroid','area','Meanintensity');
 stats1_C2 = regionprops(maskT1, frameT1_C2, 'Meanintensity');
 stats2 = regionprops(maskT2, frameT2_C1, 'Centroid','area','Meanintensity');
+stats2_C2 = regionprops(maskT2, frameT2_C2, 'Meanintensity');
 
 xy1 = cat(1,stats1.Centroid);
 a1 = cat(1,stats1.Area);
 avgInt1 = cat(1,stats1.MeanIntensity);
+avgInt1_C2 = cat(1,stats1_C2.MeanIntensity);
 tmp = -1*ones(size(a1));
-peaks{1} = [xy1, a1, tmp, avgInt1];
+peaks{1} = [xy1, a1, tmp, avgInt1,avgInt1_C2];
 
 xy2 = cat(1,stats2.Centroid);
 a2 = cat(1,stats2.Area);
 avgInt2 = cat(1,stats2.MeanIntensity);
+avgInt2_C2 = cat(1,stats2_C2.MeanIntensity);
 tmp = -1*ones(size(a2));
-peaks{2} = [xy2, a2, tmp, avgInt2];
-%x,y,area,-1,chan1 intensity, chan 2 intensity
+peaks{2} = [xy2, a2, tmp, avgInt2,avgInt2_C2];
 
 
 % Part 2. Run match frames on this peaks array. ensure that it has filled
 % the entries in peaks as described above. 
 
+PeaksMatched = MatchFrames(peaks,2,50);
+
 % Part 3. Display the image from the second frame. For each cell that was
 % matched, plot its position in frame 2 with a blue square, its position in
 % frame 1 with a red star, and connect these two with a green line. 
+figure(2);imshow(frameT2_C1,[]); hold on;
+c = 'r*';
+i = 1 ;
+for ii = 1:length(PeaksMatched{i})
+        if PeaksMatched{i}(ii,4) > 0
+            PeakSpot = PeaksMatched{i}(ii,4);
+            %PeakSpot = ii;
+            PlottedPeaks{1}(PeakSpot,:) = [PeaksMatched{i}(ii,1:2)];
+            plot(PeaksMatched{i}(ii,1),PeaksMatched{i}(ii,2),...
+                c,'MarkerSize',15);
+            hold on;
+        end
+end
 
+
+c = 'bs';
+i = 2;
+for ii = 1:length(PeaksMatched{i})
+           PlottedPeaks{i}(ii,:) = [PeaksMatched{i}(ii,1),PeaksMatched{i}(ii,2)];
+            plot(PeaksMatched{i}(ii,1),PeaksMatched{i}(ii,2),...
+                c,'MarkerSize',15);
+            hold on;
+end
+
+
+for ii = 1:length(PeaksMatched{1})
+    if sum(PlottedPeaks{1}(ii,1:2)) > 0
+    plot([PlottedPeaks{1}(ii,1),PlottedPeaks{2}(ii,1)],[PlottedPeaks{1}(ii,2),PlottedPeaks{2}(ii,2)],'-g','LineWidth',1);
+    hold on;
+    end
+end
+hold off;
