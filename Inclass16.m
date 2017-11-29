@@ -1,6 +1,12 @@
 % Inclass16
 clear all
 x = 1
+%GB comments
+1 100
+2 100
+3 100 
+overall 100
+
 
 %The folder in this repository contains code implementing a Tracking
 %algorithm to match cells (or anything else) between successive frames. 
